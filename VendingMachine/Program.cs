@@ -10,19 +10,19 @@ namespace VendingMachine
     {
         private class Snack
         {
-            public string name;
-            public double price;
-            public int stock;
+            public string Name;
+            public double Price;
+            public int Stock;
 
             public Snack(string name, double price, int stock)
             {
-                if (stock > 30)
+                if (stock > 30) // Because maximum stock is 30
                 {
                     stock = 30;
                 }
-                this.name = name;
-                this.price = price;
-                this.stock = stock;
+                this.Name = name;
+                this.Price = price;
+                this.Stock = stock;
             }
         }
         static void Main(string[] args)
@@ -30,9 +30,12 @@ namespace VendingMachine
             const int SnacksLength = 12;
             Snack[] AllSnacks = new Snack[SnacksLength];
             SetUpSnacks(AllSnacks);
+            DisplayWelcomeScreen(AllSnacks);
+            Console.ReadLine();
 
         }
 
+        // Procedure to assign the snacks
         static void SetUpSnacks(Snack[] AllSnacks)
         {
             AllSnacks[0] = new Snack("Pringles Sour Cream and Onion", 1.20, 7);
@@ -48,6 +51,32 @@ namespace VendingMachine
             AllSnacks[10] = new Snack("Tony's Chocolonely Caramel Sea Salt", 1.70, 25);
             AllSnacks[11] = new Snack("Yorkie Original", 0.9, 30);
         }
-
+        
+        static void DisplayWelcomeScreen(Snack[] AllSnacks)
+        {
+            // Length is 4_? I think?
+            Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++");
+            Console.WriteLine("+               _                           +");                //               _                          
+            Console.WriteLine("+ __      _____| | ___ ___  _ __ ___   ___  +");                // __      _____| | ___ ___  _ __ ___   ___ 
+            Console.WriteLine("+ \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ +");         // \ \ /\ / / _ \ |/ __/ _ \| '_ ` _ \ / _ \
+            Console.WriteLine("+  \\ V  V /  __/ | (_| (_) | | | | | |  __/ +");                //  \ V  V /  __/ | (_| (_) | | | | | |  __/
+            Console.WriteLine("+   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___| +");          //   \_/\_/ \___|_|\___\___/|_| |_| |_|\___|
+            Console.WriteLine("+                                           +");
+            Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++");
+            int SnackIndex = 1;
+            foreach (Snack CurrentSnack in AllSnacks)
+            {
+                Console.Write($"Option {SnackIndex}: {CurrentSnack.Name, 40}, £{CurrentSnack.Price, 5}, ");
+                if (CurrentSnack.Stock == 0)
+                {
+                    Console.WriteLine("(Out of stock)");
+                }
+                else
+                {
+                    Console.WriteLine($"({CurrentSnack.Stock} left)");
+                }
+                SnackIndex++;
+            }
+        }
     }
 }
