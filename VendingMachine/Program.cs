@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace VendingMachine
 {
@@ -51,7 +52,14 @@ namespace VendingMachine
             {
                 ReadSnacks();
             }
-
+            public void AddSnack(string Name, double Price, int Stock)
+            {
+                this.Snacks.Add(new Snack(Name, Price, Stock));
+            }
+            public void RemoveSnack(int index)
+            {
+                this.Snacks.Remove(this.Snacks[index]);
+            }
             // Procedure to assign the snacks new values
             public void SetUpSnacks()
             {
@@ -128,8 +136,16 @@ namespace VendingMachine
         // Class that holds all the things the admin can do WIP
         public class AdminOptions
         {
-            public const string pwd = "3341"; // Stores the admin password
+            const string Password = "3341"; // Stores the admin password
+            public bool LoggedIn;
 
+            public void LogIn(string Pass)
+            {
+                if (Pass == Password)
+                {
+                    this.LoggedIn = true;
+                }
+            }
         }
 
         // Main program
@@ -195,10 +211,177 @@ namespace VendingMachine
                 case 2:
                     SelectItem(UserOptions, SnacksList);
                     break;
+                case 4:
+                    AdminPanel(SnacksList);
+                    break;
                 case 3:
                     BreakLoop = true;
                     return;
             }
+        }
+
+        // Admin panel section
+        static void AdminPanel(SnacksHandler SnacksList)
+        {
+            AdminOptions Admin = new AdminOptions();
+
+            // Asks for password
+            while (!Admin.LoggedIn)
+            {
+                Console.Write("Login or E to exit: ");
+                string Login = Console.ReadLine().ToUpper();
+                if (Login == "E")
+                {
+                    return;
+                }
+                Admin.LogIn(Login);
+                if (!Admin.LoggedIn)
+                {
+                    Console.WriteLine("Incorrect password.");
+                }
+            }
+
+            // Asks for admin action
+            Console.WriteLine("(1) Enter stock, (2) Add item, (3) Remove item, (4) exit");
+            bool OptionSelectedValid = false;
+            int OptionSelected = 0;
+            while (!OptionSelectedValid)
+            {
+                Console.Write("Enter option: ");
+                try
+                {
+                    OptionSelected = int.Parse(Console.ReadLine());
+                    if (OptionSelected > 0 && OptionSelected <= 4)
+                    {
+                        OptionSelectedValid = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Not an option");
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Not a number");
+                }
+            }
+            switch (OptionSelected)
+            {
+
+                // Enter stock
+                case 1:
+                    int ItemCode = 0;
+                    bool ItemCodeValid = false;
+                    while (!ItemCodeValid)
+                    {
+                        Console.Write("Enter item code: ");
+                        try
+                        {
+                            ItemCode = int.Parse(Console.ReadLine());
+                            try
+                            {
+                                Snack CurrentSnack = SnacksList.Snacks[ItemCode]; // Redundant code, wasn't sure how else to get the try to fail.
+                                bool StockEnteredValid = false;
+                                while (!StockEnteredValid)
+                                {
+                                    Console.Write("Enter the stock to add: ");
+                                    try
+                                    {
+                                        SnacksList.Snacks[ItemCode].AddStock(int.Parse(Console.ReadLine()) - 1); // Adds the inputted stock to the inputted item
+                                        StockEnteredValid = true;
+                                    }
+                                    catch
+                                    {
+                                        Console.WriteLine("That is not a number");
+                                    }
+                                } // Right here, I started losing brain cells, sanity and the will to live.
+                            }
+                            catch
+                            {
+                                Console.WriteLine("That snack does not exist");
+                            }
+                            ItemCodeValid = true;
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Not a number");
+                        }
+                    }
+                    break;
+
+                // Add item
+                case 2:
+                    bool ItemAddedValid = false;
+                    while (!ItemAddedValid)
+                    {
+                        Console.Write("Enter the item name: ");
+                        string ItemName = Console.ReadLine();
+                        double ItemPrice = 0;
+                        bool PriceValid = false;
+                        while (!PriceValid)
+                        {
+                            Console.Write("Enter its price: £");
+                            try
+                            {
+                                ItemPrice = double.Parse(Console.ReadLine());
+                                if (Math.Round(ItemPrice, 2) == ItemPrice && Math.Round(ItemPrice % 0.05d, 2) == 0.05)
+                                {
+                                    PriceValid = true;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Invalid price, make sure the price is divisible by 5p");
+                                }
+                            }
+                            catch
+                            {
+                                Console.WriteLine("That is not a price");
+                            }
+                        }
+                        
+                        bool StockValid = false;
+                        int ItemStock = 0;
+                        while (!StockValid)
+                        {
+                            Console.Write("Enter the amount of stock: ");
+                            try
+                            {
+                                ItemStock = int.Parse(Console.ReadLine());
+                                StockValid = true;
+                            }
+                            catch
+                            {
+                                Console.WriteLine("That is not a number");
+                            }
+                        }
+                        SnacksList.AddSnack(ItemName, ItemPrice, ItemStock);
+                        ItemAddedValid = true;
+                    }
+
+
+                    break;
+
+                // Remove item
+                case 3:
+                    bool ItemIndexCorrect = false;
+                    while (!ItemIndexCorrect)
+                    {
+                        Console.Write("Enter the code of the item that you would like to remove: ");
+                        try
+                        {
+                            SnacksList.RemoveSnack(int.Parse(Console.ReadLine()) - 1);
+                            ItemIndexCorrect = true;
+                        }
+                        catch
+                        {
+                            Console.WriteLine("That is not a numnber");
+                        }
+                    }
+                    break;
+                case 4:
+                    return;
+            }
+
         }
 
         static void SelectItem(UserOptions UserOptions, SnacksHandler SnacksList)
@@ -337,21 +520,19 @@ namespace VendingMachine
             Console.WriteLine("+   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___| +");          //   \_/\_/ \___|_|\___\___/|_| |_| |_|\___|
             Console.WriteLine("+                                           +");
             Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++");
-            
+
             // List available snacks, prices and stock
-            int SnackIndex = 1;
-            foreach (Snack CurrentSnack in AllSnacks)
+            for (int i = 0; i < AllSnacks.Count(); i++)
             {
-                Console.Write($"Option {SnackIndex, 2}: {CurrentSnack.Name, 40}, £{CurrentSnack.Price, 5}, ");
-                if (CurrentSnack.Stock == 0)
+                Console.Write($"Option {i + 1, 2}: {AllSnacks[i].Name, 40}, £{AllSnacks[i].Price, 5}, ");
+                if (AllSnacks[i].Stock == 0)
                 {
                     Console.WriteLine("(Out of stock)");
                 }
                 else
                 {
-                    Console.WriteLine($"({CurrentSnack.Stock} left)");
+                    Console.WriteLine($"({AllSnacks[i].Stock} left)");
                 }
-                SnackIndex++;
             }
 
             // Display options
